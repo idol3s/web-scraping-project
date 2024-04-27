@@ -19,9 +19,9 @@ To run this project, you will need Python installed on your machine. Follow thes
 ```
 ## Contributing
 ### List of our initial contributors:
-1. **Mikołaj Śnieżko** _(Young Java, C# Developer)_
+1. **Mikołaj Śnieżko** _(Junior Java, C# Developer)_
 2. **Robert Baca** 
-3. **Arkadiusz Bodziony** _(Young JavaScript, Python Developer)_
+3. **Arkadiusz Bodziony** _(Junior JavaScript, Python Developer)_
 4. **Wiktor Ciskał**
 Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate.
