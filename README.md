@@ -23,7 +23,7 @@ To run this project, you will need Python installed on your machine. Follow thes
 2. **Robert Baca** 
 3. **Arkadiusz Bodziony** _(Junior JavaScript, Python Developer)_
 4. **Wiktor Ciskał**
-5. 
+   
 Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate.
 
