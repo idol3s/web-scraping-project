@@ -4,10 +4,23 @@ from matplotlib import pyplot as plt
 
 # Zadanie 8
 def srednia_ocen(adr, oceny):
-    wiejski = [i for i, j in zip(oceny, adr) if j == 'r']
-    miejski = [i for i, j in zip(oceny, adr) if j == 'u']
-    
-    return sum(miejski), sum(wiejski)
+    licznik_w = 0
+    licznik_m = 0
+    sum_wiejski = 0
+    sum_miejski = 0
+
+    for i, j in zip(oceny, adr):
+        if j == 'r':
+            sum_wiejski += i
+            licznik_w += 1
+        elif j == 'u':
+            sum_miejski += i
+            licznik_m += 1
+
+    srednia_wiejski = sum_wiejski / licznik_w if licznik_w != 0 else 0
+    srednia_miejski = sum_miejski / licznik_m if licznik_m != 0 else 0
+
+    return round(srednia_miejski, 2), round(srednia_wiejski, 2)
 
 
 # Zadanie 9
