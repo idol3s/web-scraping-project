@@ -4,9 +4,8 @@
 This project is a simple Python application designed for educational purposes. It demonstrates basic programming concepts in Python and provides a user-friendly interface for interacting with the program.
 
 ## Features
-- **Feature 1**: Description of the first feature.
-- **Feature 2**: Description of the second feature.
-- **Feature 3**: Additional features and their functionalities.
+- **Feature 1**: Data analysis
+- **Feature 2**: Web scrapping
 
 ## Installation
 To run this project, you will need Python installed on your machine. Follow these steps:
