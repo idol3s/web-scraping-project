@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
+import io
 
 
 def scrape_data(url):  # utworzenie funkcji do latwiejszego scrapowania danych uzywajac powtarzajacych sie elementów
@@ -145,19 +147,36 @@ def calculate():
         if total_score < 0.9:
             total_score_label.config(text=f"Łączny wynik: {total_score} (słaby)")
             total_score_label.config(foreground="red")
+            img_url = "https://media.makeameme.org/created/oh-dude-thats-5c689f.jpg"
         elif 0.9 <= total_score < 1.15:
             total_score_label.config(text=f"Łączny wynik: {total_score} (średni)")
             total_score_label.config(foreground="yellow")
+            img_url = "https://us-tuna-sounds-images.voicemod.net/64c2bcda-a203-47cd-a81a-68bf07397033-1701636231104.jpeg"
         else:
             total_score_label.config(text=f"Łączny wynik: {total_score} (świetny!)")
             total_score_label.config(foreground="green")
+            img_url = "https://melmagazine.com/wp-content/uploads/2021/01/66f-1.jpg"
 
         # Update total price label
         total_price_label.config(text=f"Łączna cena: {total_price} {selected_currency}")
+         
+        
+        # Wyświetlenie obrazka
+        response = requests.get(img_url)
+        img_data = response.content
+        img = Image.open(io.BytesIO(img_data))
+        img = img.resize((150, 100), Image.LANCZOS)
+        img = ImageTk.PhotoImage(img)
+
+        image_label.config(image=img)
+        image_label.image = img
+        image_label.grid(row=7, column=1, rowspan=2)
+        
 
     except KeyError:
         total_score_label.config(text="Wybierz każdy komponent!")  # lekka, prymitywna kontrola bledow
         total_price_label.config(text="")  # lekka, prymitywna kontrola bledow
+        image_label.config(image='')
 
 
 def show_prices():
@@ -180,7 +199,10 @@ def show_prices():
     prices_hdd_label.config(text=f"Cena HDD: {hdd_price} {selected_currency}")
     prices_ram_label.config(text=f"Cena RAM: {ram_price} {selected_currency}")
     prices_mother_label.config(text=f"Cena płyty głównej: {mother_board_price} {selected_currency}")
-
+    
+    # Zmiana szerokości okna
+    root.geometry(f"{window_width + 170}x{window_height}+{position_right - 170}+{position_top}")
+    
 
 root = tk.Tk()  # utworzenie okna dla naszego GUI
 root.title("Podsumowanie podzespołów")
@@ -190,7 +212,7 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
 window_width = 500
-window_height = 650
+window_height = 700
 position_top = int(screen_height/2 - window_height/2)
 position_right = int(screen_width/2 - window_width/2)
 root.geometry(f"{window_width}x{window_height}+{position_right}+{position_top}")
@@ -250,11 +272,11 @@ calculate_button.grid(row=6, column=0, columnspan=2, pady=20)
 
 # Etykieta do wyświetlania wyników
 total_score_label = ttk.Label(root, text="Łączny wynik:") 
-total_score_label.grid(row=7, column=0, columnspan=2, pady=5)
+total_score_label.grid(row=7, column=0, columnspan=1, padx=(80,0), pady=5, sticky='w')
 
 # Etykieta do wyświetlania cen
 total_price_label = ttk.Label(root, text="Łączna cena:")
-total_price_label.grid(row=8, column=0, columnspan=2, pady=5)
+total_price_label.grid(row=8, column=0, columnspan=1, padx=(80,0), pady=5, sticky='w')
 
 # utworzenie nowego przycisku
 price_button = ttk.Button(root, text="Pokaż ceny szczegółowe", command=show_prices)
@@ -275,6 +297,10 @@ prices_ram_label.grid(row=11, column=1, columnspan=2, pady=5, padx=45, sticky='w
 
 prices_mother_label = ttk.Label(root, text="")
 prices_mother_label.grid(row=12, column=1, columnspan=2, pady=5, padx=45, sticky='w')
+
+#  Etykieta do wyświetlania obrazków
+image_label = ttk.Label(root)
+image_label.grid(row=7, column=1, rowspan=2, padx=5, sticky='e')
 
 # Pzycisk wyjscia z naszego okienka
 wyjscie = tk.Button(root, 
