@@ -30,6 +30,7 @@ cpu_scores = [round(i/max(cpu_scores), 2) for i in cpu_scores]  # oraz znormaliz
 cpu_prices = dict(zip(cpu, cpu_prices))  # stworzenie slownika z cena kazdego cpu
 cpu_scores = dict(zip(cpu, cpu_scores))  # stworzenie slownika z ocena kazdego cpu
 
+
 # zapytanie dla gpu
 soup = scrape_data('https://www.videocardbenchmark.net/gpu_value.html')  # scrapowana strona
 gpu = soup.find_all('span', class_="prdname")
@@ -45,6 +46,7 @@ gpu_scores = [round(i/max(gpu_scores), 2) for i in gpu_scores]  # oczyszczenie o
 
 gpu_prices = dict(zip(gpu, gpu_prices))  # stworzenie slownika z cena kazdego gpu
 gpu_scores = dict(zip(gpu, gpu_scores))  # stworzenie slownika z ocena kazdego gpu
+
 
 # zapytanie dla hdd
 soup = scrape_data('https://www.harddrivebenchmark.net/hdd_value.html')  # scrapowana strona
@@ -62,6 +64,7 @@ hdd_scores = [round(i/max(hdd_scores), 2) for i in hdd_scores]  # oczyszczenie o
 hdd_prices = dict(zip(hdd, hdd_prices))  # stworzenie slownika z cena kazdego hdd
 hdd_scores = dict(zip(hdd, hdd_scores))  # stworzenie slownika z ocena kazdego hdd
 
+
 # Zapytania dla ram
 soup = scrape_data('https://www.memorybenchmark.net/popular.html')  # Scrapowana strona
 ram = soup.find_all('span', class_="prdname")
@@ -72,33 +75,35 @@ ram_prices = [float(i.text.replace('*', '').replace('NA', '0')) for i in ram_pri
 # oczyszczenie listy
 
 ram_scores = soup.find_all('span', class_="count")  # pobrane danych dla ocen (przed konwersja)
-ram_scores = [float(i.text.replace(' %', '')) * 10.0 for i in ram_scores]
+ram_scores = [float(i.text.replace(' %', '')) for i in ram_scores]
 # konwersja z procentow na wyniki
 
 # Usunięcie rekordów z ceną równą zero i dostosowanie normalizacji
 ram_data = list(zip(ram, ram_prices, ram_scores))
 ram_data = [(name, price, score) for name, price, score in ram_data if price > 0]
 
-# Obliczenie maksymalnej wartości ocen ze zmodyfikowanych danych
+# Obliczenie maksymalnej wartości ocen ze zmodyfikowanych danych - dla normalizacji
 max_ram_score = max(ram_data, key=lambda x: x[2])[2]
 
 # Normalizacja ocen RAM na podstawie maksymalnej wartości z danych po usunięciu cen równych zero
 ram = [data[0] for data in ram_data]
 ram_prices = {data[0]: data[1] for data in ram_data}
-ram_scores = {data[0]: data[2] / max_ram_score for data in ram_data}
+ram_scores = {data[0]: round(data[2] / max_ram_score, 2) for data in ram_data}
+
 
 # Zapytania dla płyt głównych
 soup = scrape_data('https://versus.com/en/motherboard')
 mother_board = soup.find_all('p', class_="BarsItem__name___3EC0w")
 mother_board = [i.text for i in mother_board]
 
+# Odnajdywanie cen płyt głównych i konwersja na pełne liczby
 mother_board_prices = soup.find_all('div', class_="BarsItem__price___3dk0c")
 mother_board_prices = [float(i.text[-5:].replace(',', '.')) * 100 if len(i.text) > 0 else None
                        for i in mother_board_prices]
 
 mother_board_scores = soup.find_all('span', class_="pointsText")
 mother_board_scores = [float(i.text.replace('points', '')) for i in mother_board_scores]
-mother_board_scores = [round(i/max(mother_board_scores) * 0.3, 3) for i in mother_board_scores]
+mother_board_scores = [round(i/max(mother_board_scores), 2) for i in mother_board_scores]
 
 mother_board_data = list(zip(mother_board, mother_board_prices, mother_board_scores))
 mother_board_data = [(name, price, score) for name, price, score in mother_board_data]
@@ -144,11 +149,11 @@ def calculate():
         total_score = round(cpu_scores[selected_cpu] + gpu_scores[selected_gpu] + hdd_scores[selected_hdd] +
                             ram_scores[selected_ram] + mother_board_scores[selected_mother], 2)
 
-        if total_score < 0.9:
+        if total_score < 1.4:
             total_score_label.config(text=f"Łączny wynik: {total_score} (słaby)")
             total_score_label.config(foreground="red")
             img_url = "https://media.makeameme.org/created/oh-dude-thats-5c689f.jpg"
-        elif 0.9 <= total_score < 1.15:
+        elif 1.4 <= total_score < 1.85:
             total_score_label.config(text=f"Łączny wynik: {total_score} (średni)")
             total_score_label.config(foreground="yellow")
             img_url = "https://us-tuna-sounds-images.voicemod.net/64c2bcda-a203-47cd-a81a-68bf07397033-1701636231104.jpeg"
@@ -157,9 +162,8 @@ def calculate():
             total_score_label.config(foreground="green")
             img_url = "https://melmagazine.com/wp-content/uploads/2021/01/66f-1.jpg"
 
-        # Update total price label
+        # cena kosztu całkowitego
         total_price_label.config(text=f"Łączna cena: {total_price} {selected_currency}")
-         
         
         # Wyświetlenie obrazka
         response = requests.get(img_url)
@@ -171,7 +175,6 @@ def calculate():
         image_label.config(image=img)
         image_label.image = img
         image_label.grid(row=7, column=1, rowspan=2)
-        
 
     except KeyError:
         total_score_label.config(text="Wybierz każdy komponent!")  # lekka, prymitywna kontrola bledow
@@ -200,24 +203,13 @@ def show_prices():
     prices_ram_label.config(text=f"Cena RAM: {ram_price} {selected_currency}")
     prices_mother_label.config(text=f"Cena płyty głównej: {mother_board_price} {selected_currency}")
     
-    # Zmiana szerokości okna
-    root.geometry(f"{window_width + 170}x{window_height}+{position_right - 170}+{position_top}")
-    
 
 root = tk.Tk()  # utworzenie okna dla naszego GUI
 root.title("Podsumowanie podzespołów")
 root.configure(bg="#2e2e2e")
 
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
 
-window_width = 500
-window_height = 700
-position_top = int(screen_height/2 - window_height/2)
-position_right = int(screen_width/2 - window_width/2)
-root.geometry(f"{window_width}x{window_height}+{position_right}+{position_top}")
-
-# Fragment kodu sluzacy dla nadanie stylu naszym przyciskom, labelom, etykietom
+# Fragment kodu sluzacy do nadanie stylu naszym przyciskom, labelom, etykietom
 style = ttk.Style()
 style.configure("TLabel", background="#2e2e2e", foreground="white", font=("Arial", 14))
 style.configure("TCombobox", font=("Arial", 12))
@@ -272,11 +264,11 @@ calculate_button.grid(row=6, column=0, columnspan=2, pady=20)
 
 # Etykieta do wyświetlania wyników
 total_score_label = ttk.Label(root, text="Łączny wynik:") 
-total_score_label.grid(row=7, column=0, columnspan=1, padx=(80,0), pady=5, sticky='w')
+total_score_label.grid(row=7, column=0, columnspan=1, padx=(80, 0), pady=5, sticky='w')
 
 # Etykieta do wyświetlania cen
 total_price_label = ttk.Label(root, text="Łączna cena:")
-total_price_label.grid(row=8, column=0, columnspan=1, padx=(80,0), pady=5, sticky='w')
+total_price_label.grid(row=8, column=0, columnspan=1, padx=(80, 0), pady=5, sticky='w')
 
 # utworzenie nowego przycisku
 price_button = ttk.Button(root, text="Pokaż ceny szczegółowe", command=show_prices)
