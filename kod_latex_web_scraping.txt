@@ -144,35 +144,49 @@ Sekcja pobiera i przetwarza dane o dyskach twardych (HDD) oraz dyskach półprze
 
 \section{Pobieranie danych o RAM}
 \begin{lstlisting}[language=Python]
-# Zapytanie dla RAM
-soup = scrape_data('https://www.memorybenchmark.net/popular.html')
-ram = [i.text for i in soup.find_all('span', class_="prdname")]
-ram_prices = [float(i.text.replace('*', '').replace('NA', '0')) for i in soup.find_all('span', class_="price-neww")]
-ram_scores = [float(i.text.replace(' %', '')) * 10.0 for i in soup.find_all('span', class_="count")]
+# Zapytania dla ram
+soup = scrape_data('https://www.memorybenchmark.net/popular.html')  # Scrapowana strona
+ram = soup.find_all('span', class_="prdname")
+ram = [i.text for i in ram]  # zapisanie nazw ram do listy
+ram_prices = soup.find_all('span', class_="price-neww")  # pobrane cen dla kazdego ramu
+ram_prices = [float(i.text.replace('*', '').replace('NA', '0')) for i in ram_prices]
+# oczyszczenie listy
+ram_scores = soup.find_all('span', class_="count")  # pobrane danych dla ocen (przed konwersja)
+ram_scores = [float(i.text.replace(' %', '')) for i in ram_scores]
+# konwersja z procentow na wyniki
+# Usunięcie rekordów z ceną równą zero i dostosowanie normalizacji
 ram_data = list(zip(ram, ram_prices, ram_scores))
 ram_data = [(name, price, score) for name, price, score in ram_data if price > 0]
+# Obliczenie maksymalnej wartości ocen ze zmodyfikowanych danych - dla normalizacji
 max_ram_score = max(ram_data, key=lambda x: x[2])[2]
+# Normalizacja ocen RAM na podstawie maksymalnej wartości z danych po usunięciu cen równych zero
 ram = [data[0] for data in ram_data]
 ram_prices = {data[0]: data[1] for data in ram_data}
-ram_scores = {data[0]: data[2] / max_ram_score for data in ram_data]
+ram_scores = {data[0]: round(data[2] / max_ram_score, 2) for data in ram_data}
 \end{lstlisting}
 Ta sekcja pobiera i przetwarza dane o pamięciach RAM, w tym nazwy, ceny i oceny. Zawiera dodatkowe kroki przetwarzania, aby usunąć rekordy z ceną równą zero i znormalizować oceny.
 
 \section{Pobieranie danych o płytach głównych}
 \begin{lstlisting}[language=Python]
-# Zapytanie dla płyt głównych
+# Zapytania dla płyt głównych
 soup = scrape_data('https://versus.com/en/motherboard')
-mother_board = [i.text for i in soup.find_all('p', class_="BarsItem__name___3EC0w")]
-mother_board_prices = [float(i.text[-5:].replace(',', '.')) * 100 if len(i.text) > 0 else None for i in soup.find_all('div', class_="BarsItem__price___3dk0c")]
-mother_board_scores = [round(float(i.text.replace('points', '')) / max([float(i.text.replace('points', '')) for i in soup.find_all('span', class_="pointsText")]) * 0.3, 3) for i in soup.find_all('span', class_="pointsText")]
+mother_board = soup.find_all('p', class_="BarsItem__name___3EC0w")
+mother_board = [i.text for i in mother_board]
+# Odnajdywanie cen płyt głównych i konwersja na pełne liczby
+mother_board_prices = soup.find_all('div', class_="BarsItem__price___3dk0c")
+mother_board_prices = [float(i.text[-5:].replace(',', '.')) * 100 if len(i.text) > 0 else None for i in mother_board_prices]
+mother_board_scores = soup.find_all('span', class_="pointsText")
+mother_board_scores = [float(i.text.replace('points', '')) for i in mother_board_scores]
+mother_board_scores = [round(i/max(mother_board_scores), 2) for i in mother_board_scores]
 mother_board_data = list(zip(mother_board, mother_board_prices, mother_board_scores))
 mother_board_data = [(name, price, score) for name, price, score in mother_board_data]
 mother_board = [data[0] for data in mother_board_data]
 mother_board_prices = {data[0]: data[1] for data in mother_board_data}
-mother_board_scores = {data[0]: data[2] for data in mother_board_data]
+mother_board_scores = {data[0]: data[2] for data in mother_board_data}
 \end{lstlisting}
 Ta sekcja pobiera i przetwarza dane o płytach głównych, w tym nazwy, ceny i oceny. Wartości cen są przeliczane na podstawie odpowiednich formatów.
 
+\vspace{5cm}
 \section{Pobieranie danych walutowych}
 \begin{lstlisting}[language=Python]
 # Pobieranie kursów walut
