@@ -202,10 +202,10 @@ def show_prices():
     prices_hdd_label.config(text=f"Cena HDD: {hdd_price} {selected_currency}")
     prices_ram_label.config(text=f"Cena RAM: {ram_price} {selected_currency}")
     prices_mother_label.config(text=f"Cena płyty głównej: {mother_board_price} {selected_currency}")
-    
+    calculate()
 
 root = tk.Tk()  # utworzenie okna dla naszego GUI
-root.title("Podsumowanie podzespołów")
+root.title("Konfigurator sprzętu PC")
 root.configure(bg="#2e2e2e")
 
 
